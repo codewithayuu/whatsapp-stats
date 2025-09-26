@@ -1,61 +1,127 @@
-📊 WhatsApp Chat Analyzer
+# 📊 WhatsApp Chat Analyzer
 
-<div align="center">
+<div align="center">  
+🚀 **Dive deep into your WhatsApp conversations with a modern, privacy-first web app.**  
+</div>  
 
-</div>
+This tool transforms your exported chat history into an interactive dashboard full of meaningful insights. All processing happens **directly in your browser** — your data never leaves your device.
 
-    Dive deep into your WhatsApp conversations with this sleek, modern, and privacy-focused web application. It transforms your exported chat history into a rich, interactive dashboard full of detailed insights. The entire analysis process happens directly in your browser, guaranteeing that no data ever leaves your device.
+---
 
-✨ Key Features
+## ✨ Features
 
-Discover patterns and trends you never knew existed with a multi-faceted analysis of your chat history.
+### 📜 Comprehensive Summary
 
-    📜 Comprehensive Summary: Get a high-level overview including date ranges, total messages, words, media, and a unique Active Users count for the last 7 days.
+* High-level overview of your chat
+* Date ranges, total messages, words, media count
+* Unique active users in the past 7 days
 
-    👤 User-Level Analysis: Drill down into individual contributions, ranking users by messages, words, emojis, and average message length.
+### 👤 User-Level Insights
 
-    📅 Activity Insights: Uncover the rhythm of your conversation with breakdowns by hour, day of the week, and month. Track first and last messages for every user.
+* Rank users by messages, words, and emojis
+* Average message length per user
+* First & last messages for each participant
 
-    ✍️ Content Analysis: Understand what is being discussed with analytics on most used words, top emojis (overall and per-user), and most frequently shared websites.
+### 📅 Activity Trends
 
-    🔒 Privacy First: All processing is done client-side. Your chat files are never uploaded to a server.
+* Breakdown by hour, day, and month
+* Discover conversation rhythms and habits
 
-    🔄 Session Persistence: Your analysis persists through page reloads for the entire browser session.
+### ✍️ Content Analysis
 
-    📱 Fully Responsive: A beautiful, dark-themed UI that looks great on both desktop and mobile.
+* Most used words and top emojis (overall & per user)
+* Frequently shared websites and links
 
-🚀 How It Works: Behind the Scenes
+### 🔒 Privacy First
 
-The entire analysis is a sophisticated client-side operation designed for speed and privacy.
+* 100% client-side processing
+* No servers, no uploads — **your chats stay yours**
 
-    File Handling in the Browser: When you drop a .zip file, the browser's JavaScript engine immediately takes over. The file is not uploaded anywhere.
+### 🔄 Session Persistence
 
-    In-Memory Unzipping: The powerful JSZip library reads the .zip archive directly in memory. It locates and extracts the _chat.txt file without requiring any server-side processing or temporary file storage.
+* Your analysis survives page reloads
+* Stored locally for your session
 
-    High-Speed Parsing: The application iterates through every line of the chat file. A fine-tuned Regular Expression (Regex) pattern parses each message to accurately separate the timestamp, author, and content.
+### 📱 Fully Responsive
 
-    Data Aggregation: As the chat is parsed, a series of Map objects are populated in real-time to aggregate statistics. This includes counting messages, words, emojis, and links for each user, tracking activity by the hour and day, and building frequency lists for words and emojis.
+* Sleek, **dark-themed UI**
+* Optimized for both desktop and mobile
 
-    State Management & Rendering: Once the file is fully processed (which typically takes less than a second), the aggregated data is structured into a clean JSON object. This object is then passed to the main React component's state, triggering a re-render and instantly displaying your beautiful, data-rich dashboard.
+---
 
-    Session Caching: To provide a seamless experience, the final analytics object is stored in the browser's sessionStorage. This ensures that your data remains available even if you refresh the page, and is only cleared when you close the tab or analyze a new file.
+## ⚡ How It Works
 
-🛠️ Technology Stack
+1. **Export Your Chat**
 
-This project is built with a modern, powerful, and client-centric tech stack:
+   * In WhatsApp: `Chat Options > More > Export Chat`
+   * Select **“Without Media”** to generate a `.zip` file
 
-    Frontend: React (with Hooks) via Next.js
+2. **Upload & Analyze**
 
-    Styling: Tailwind CSS
+   * Drag & drop the `.zip` file into the app
+   * The in-browser engine parses and processes instantly
 
-    File Processing: JSZip
+3. **Explore Your Dashboard**
 
-📄 License
+   * Navigate through summaries, user stats, trends, and word clouds
 
-Distributed under the MIT License. See LICENSE for more information.
+---
 
-<div align="center">
+## 🛠️ Tech Stack
 
-Built with ❤️ by iambatman
+* **Frontend:** [Next.js](https://nextjs.org/) (React + Hooks)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **File Processing:** [JSZip](https://stuk.github.io/jszip/)
 
-</div>
+---
+
+## 🏁 Getting Started
+
+Follow these steps to set up locally:
+
+### Prerequisites
+
+* Node.js v18+
+* npm or yarn
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/whatsapp-chat-analyzer.git
+cd whatsapp-chat-analyzer
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+Then open 👉 [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🤝 Contributing
+
+Contributions make the open-source community amazing! Here’s how you can help:
+
+1. **Fork** the project
+2. **Create** a feature branch → `git checkout -b feature/AmazingFeature`
+3. **Commit** your changes → `git commit -m 'Add some AmazingFeature'`
+4. **Push** to your branch → `git push origin feature/AmazingFeature`
+5. **Open** a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for details.
+
+---
+
+<div align="center">  
+Built with ❤️ by **codewithayuu**  
+</div>  
+
+---
