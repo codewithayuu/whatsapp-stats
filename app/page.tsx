@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 
 // Helper components for icons (inline SVGs)
 const UploadIcon = () => (
@@ -10,18 +10,19 @@ const UploadIcon = () => (
     </svg>
 );
 
-const StatIcon = ({ type }) => {
-    const icons = {
-        calendar: <path d="M8 2v4m8-4v4H4V2h16zM4 8h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" />,
-        messages: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
-        words: <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9" />,
-        letters: <path d="M4 7V4h16v3M9 20h6M12 4v16" />,
-        files: <><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></>,
-        emojis: <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
-        links: <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />,
-        clock: <path d="M22 12h-4M2 12H6M12 2v4M12 22v-4M12 12a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>,
-        users: <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
-    };
+const icons = {
+    calendar: <path d="M8 2v4m8-4v4H4V2h16zM4 8h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" />,
+    messages: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+    words: <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9" />,
+    letters: <path d="M4 7V4h16v3M9 20h6M12 4v16" />,
+    files: <><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></>,
+    emojis: <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+    links: <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />,
+    clock: <path d="M22 12h-4M2 12H6M12 2v4M12 22v-4M12 12a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/>,
+    users: <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
+};
+
+const StatIcon = ({ type }: { type: keyof typeof icons }) => {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-teal-400">
             {icons[type] || <polyline points="13 2 13 9 20 9" />}
@@ -29,7 +30,7 @@ const StatIcon = ({ type }) => {
     );
 };
 
-const MedalIcon = ({ rank }) => {
+const MedalIcon = ({ rank }: { rank: number }) => {
     const colors = { 0: "text-yellow-400", 1: "text-gray-300", 2: "text-yellow-600" };
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-5 h-5 ${colors[rank] || 'text-transparent'}`}>
@@ -41,7 +42,7 @@ const MedalIcon = ({ rank }) => {
 
 // Main Application Component
 export default function App() {
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] = useState<any | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('summary');
@@ -66,7 +67,7 @@ export default function App() {
     return () => { document.body.removeChild(script); }
   }, []);
 
-  const parseWhatsAppDate = (dateStr) => {
+  const parseWhatsAppDate = (dateStr: string) => {
       const cleanStr = dateStr.replace(/\[|\]/g, '').replace(',', '');
       const dateTimeParts = cleanStr.split(' ');
       
@@ -87,20 +88,20 @@ export default function App() {
       return new Date(year, parseInt(month) - 1, parseInt(day), hours, minutes);
   };
 
-  const processChatText = (text) => {
+  const processChatText = (text: string) => {
     const lines = text.split('\n');
     const messageRegex = /^\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4},? \d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*([^:]+):\s*(.*)/s;
     const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji})/gu;
     const linkRegex = /https?:\/\/[^\s]+/g;
     
     const intermediateStats = {
-        userStats: new Map(), wordsPerUser: new Map(), lettersPerUser: new Map(),
-        filesPerUser: new Map(), emojisPerUser: new Map(), linksPerUser: new Map(),
-        firstMessage: new Map(), lastMessage: new Map(),
+        userStats: new Map<string, number>(), wordsPerUser: new Map<string, number>(), lettersPerUser: new Map<string, number>(),
+        filesPerUser: new Map<string, number>(), emojisPerUser: new Map<string, number>(), linksPerUser: new Map<string, number>(),
+        firstMessage: new Map<string, {date: string; message: string}>(), lastMessage: new Map<string, {date: string; message: string}>(),
         messagesPerDay: Array(7).fill(0), messagesPerHour: Array(24).fill(0),
-        messagesPerMonth: new Map(), messagesPerDate: new Map(),
-        wordFrequency: new Map(), emojiFrequency: new Map(), websiteFrequency: new Map(),
-        emojisByUser: new Map(), websitesByUser: new Map(), dates: []
+        messagesPerMonth: new Map<string, number>(), messagesPerDate: new Map<string, number>(),
+        wordFrequency: new Map<string, number>(), emojiFrequency: new Map<string, number>(), websiteFrequency: new Map<string, number>(),
+        emojisByUser: new Map<string, Map<string, number>>(), websitesByUser: new Map<string, Map<string, number>>(), dates: [] as string[]
     };
 
     lines.forEach(line => {
@@ -151,7 +152,7 @@ export default function App() {
         emojis.forEach(emoji => {
             intermediateStats.emojiFrequency.set(emoji, (intermediateStats.emojiFrequency.get(emoji) || 0) + 1);
             if (!intermediateStats.emojisByUser.has(cleanedName)) intermediateStats.emojisByUser.set(cleanedName, new Map());
-            const userEmojiMap = intermediateStats.emojisByUser.get(cleanedName);
+            const userEmojiMap = intermediateStats.emojisByUser.get(cleanedName)!;
             userEmojiMap.set(emoji, (userEmojiMap.get(emoji) || 0) + 1);
         });
 
@@ -160,7 +161,7 @@ export default function App() {
                 const domain = new URL(link).hostname.replace('www.', '');
                 intermediateStats.websiteFrequency.set(domain, (intermediateStats.websiteFrequency.get(domain) || 0) + 1);
                 if (!intermediateStats.websitesByUser.has(cleanedName)) intermediateStats.websitesByUser.set(cleanedName, new Map());
-                const userWebsiteMap = intermediateStats.websitesByUser.get(cleanedName);
+                const userWebsiteMap = intermediateStats.websitesByUser.get(cleanedName)!;
                 userWebsiteMap.set(domain, (userWebsiteMap.get(domain) || 0) + 1);
             } catch {}
         });
@@ -170,16 +171,16 @@ export default function App() {
         throw new Error("Could not find any valid WhatsApp messages. Please upload a valid chat export file.");
     }
     
-    const sortMap = (map) => Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
-    const getTop = (map) => Array.from(map.entries()).map(([item, count]) => ({ item, count })).sort((a, b) => b.count - a.count);
+    const sortMap = (map: Map<string, number>) => Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    const getTop = (map: Map<string, number>) => Array.from(map.entries()).map(([item, count]) => ({ item, count })).sort((a, b) => b.count - a.count);
 
     const messagesPerUser = sortMap(intermediateStats.userStats);
     const wordsPerUser = sortMap(intermediateStats.wordsPerUser);
     const lettersPerUser = sortMap(intermediateStats.lettersPerUser);
     const avgLettersPerMessage = messagesPerUser.map(({ name, count }) => ({
         name,
-        avg: count > 0 ? ((intermediateStats.lettersPerUser.get(name) || 0) / count).toFixed(1) : 0
-    })).sort((a, b) => b.avg - a.avg);
+        avg: count > 0 ? ((intermediateStats.lettersPerUser.get(name) || 0) / count).toFixed(1) : "0"
+    })).sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg));
 
     const summary = {
         from: intermediateStats.dates[0] || 'N/A', to: intermediateStats.dates[intermediateStats.dates.length - 1] || 'N/A',
@@ -210,10 +211,10 @@ export default function App() {
         linksPerUser: sortMap(intermediateStats.linksPerUser),
         messagesByDay: intermediateStats.messagesPerDay.map((count, i) => ({ day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i], count })),
         messagesByHour: intermediateStats.messagesPerHour.map((count, i) => ({ hour: i.toString().padStart(2, '0'), count })),
-        messagesByMonth: Array.from(intermediateStats.messagesPerMonth.entries()).map(([month, count]) => ({ month, count })).sort((a,b) => new Date(b.month.split('/')[1], b.month.split('/')[0]-1) - new Date(a.month.split('/')[1], a.month.split('/')[0]-1)),
+        messagesByMonth: Array.from(intermediateStats.messagesPerMonth.entries()).map(([month, count]) => ({ month, count })).sort((a,b) => new Date(b.month.split('/')[1], parseInt(b.month.split('/')[0])-1, 1).getTime() - new Date(a.month.split('/')[1], parseInt(a.month.split('/')[0])-1, 1).getTime()),
         topDays: Array.from(intermediateStats.messagesPerDate.entries()).map(([date, count]) => ({ date, count })).sort((a, b) => b.count - a.count).slice(0, 20),
-        firstMessages: Array.from(intermediateStats.firstMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(a.date) - parseWhatsAppDate(b.date)),
-        lastMessages: Array.from(intermediateStats.lastMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(b.date) - parseWhatsAppDate(a.date)),
+        firstMessages: Array.from(intermediateStats.firstMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(a.date).getTime() - parseWhatsAppDate(b.date).getTime()),
+        lastMessages: Array.from(intermediateStats.lastMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(b.date).getTime() - parseWhatsAppDate(a.date).getTime()),
         mostUsedWords: getTop(intermediateStats.wordFrequency).slice(0, 50).map(({item, count}) => ({word: item, count})),
         mostUsedEmojis: getTop(intermediateStats.emojiFrequency).slice(0, 50).map(({item, count}) => ({emoji: item, count})),
         mostUsedWebsites: getTop(intermediateStats.websiteFrequency).map(({item, count}) => ({website: item, count})),
@@ -225,8 +226,8 @@ export default function App() {
     sessionStorage.setItem('whatsAppChatAnalytics', JSON.stringify(finalAnalytics));
   };
 
-  const handleFile = (e) => {
-    const file = e.target.files[0]; if (!file) return;
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
     setIsLoading(true); setError(''); setAnalytics(null);
     sessionStorage.removeItem('whatsAppChatAnalytics');
     const reader = new FileReader();
@@ -234,12 +235,12 @@ export default function App() {
       try {
         let textContent = '';
         if (file.name.toLowerCase().endsWith('.zip')) {
-          if (!window.JSZip) { throw new Error("ZIP library not loaded yet. Please wait a moment and try again."); }
-          const zip = await window.JSZip.loadAsync(ev.target.result);
+          if (!(window as any).JSZip) { throw new Error("ZIP library not loaded yet. Please wait a moment and try again."); }
+          const zip = await (window as any).JSZip.loadAsync(ev.target!.result);
           const chatFile = Object.keys(zip.files).find(name => name.endsWith('.txt') && !name.startsWith('__MACOSX'));
           if (!chatFile) { throw new Error("Could not find a '_chat.txt' file inside the ZIP archive."); }
           textContent = await zip.file(chatFile).async('string');
-        } else { textContent = ev.target.result; }
+        } else { textContent = ev.target!.result as string; }
         processChatText(textContent);
       } catch (err) {
         if (err instanceof Error) {
@@ -256,7 +257,7 @@ export default function App() {
     if (file.name.toLowerCase().endsWith('.zip')) { reader.readAsArrayBuffer(file); } else { reader.readAsText(file); }
   };
   
-  const StatCard = ({ label, value, icon }) => (
+  const StatCard = ({ label, value, icon }: { label: string; value: string | number; icon: keyof typeof icons }) => (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4 flex flex-col justify-between hover:bg-slate-700/70 transition-colors duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-teal-500/10">
         <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-slate-400">{label}</p>
@@ -266,7 +267,7 @@ export default function App() {
     </div>
   );
 
-  const BarChartCard = ({ title, data, dataKey, labelKey }) => {
+  const BarChartCard = ({ title, data, dataKey, labelKey }: { title: string; data: Array<Record<string, any>>; dataKey: string; labelKey: string }) => {
       const maxValue = data.length > 0 ? Math.max(...data.map(d => d[dataKey])) : 0;
       return (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl">
@@ -289,7 +290,7 @@ export default function App() {
       )
   };
 
-  const ListCard = ({ title, data, renderItem }) => (
+  const ListCard = ({ title, data, renderItem }: { title: string; data: Array<any>; renderItem: (item: any, index: number) => ReactNode }) => (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl shadow-xl">
         <h2 className="text-xl font-semibold text-teal-300 mb-4">{title}</h2>
         <ul className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
