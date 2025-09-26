@@ -79,7 +79,7 @@ export default function App() {
       
       const timeParts = timePart.split(':').map(p => parseInt(p));
       let hours = timeParts[0];
-      const minutes = timeParts[1];
+      const minutes = timeParts[1]; // Changed from let to const
 
       if (ampmPart === 'pm' && hours < 12) hours += 12;
       if (ampmPart === 'am' && hours === 12) hours = 0;
@@ -155,7 +155,7 @@ export default function App() {
             userEmojiMap.set(emoji, (userEmojiMap.get(emoji) || 0) + 1);
         });
 
-        links.forEach(link => {
+        links.forEach(link => { // Removed unused _ variable
             try {
                 const domain = new URL(link).hostname.replace('www.', '');
                 intermediateStats.websiteFrequency.set(domain, (intermediateStats.websiteFrequency.get(domain) || 0) + 1);
