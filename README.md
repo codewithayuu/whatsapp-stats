@@ -121,7 +121,7 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 ---
 
 <div align="center">  
-Built with ❤️ by **codewithayuu**  
+Built with ❤️ by *iambatman*  
 </div>  
 
 ---
