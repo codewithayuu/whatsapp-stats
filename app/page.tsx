@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 // Helper components for icons (inline SVGs)
 const UploadIcon = () => (
@@ -77,7 +77,9 @@ export default function App() {
       const [day, month, yearShort] = datePart.split('/');
       const year = parseInt(yearShort) < 100 ? 2000 + parseInt(yearShort) : parseInt(yearShort);
       
-      let [hours, minutes] = timePart.split(':').map(p => parseInt(p));
+      const timeParts = timePart.split(':').map(p => parseInt(p));
+      let hours = timeParts[0];
+      const minutes = timeParts[1];
 
       if (ampmPart === 'pm' && hours < 12) hours += 12;
       if (ampmPart === 'am' && hours === 12) hours = 0;
@@ -160,7 +162,7 @@ export default function App() {
                 if (!intermediateStats.websitesByUser.has(cleanedName)) intermediateStats.websitesByUser.set(cleanedName, new Map());
                 const userWebsiteMap = intermediateStats.websitesByUser.get(cleanedName);
                 userWebsiteMap.set(domain, (userWebsiteMap.get(domain) || 0) + 1);
-            } catch (_) {}
+            } catch {}
         });
     });
     
@@ -392,5 +394,6 @@ export default function App() {
     </div>
   );
 }
+
 
 
