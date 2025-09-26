@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 // Helper components for icons (inline SVGs)
 const UploadIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-teal-300">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-teal-300">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="17 8 12 3 7 8" />
         <line x1="12" y1="3" x2="12" y2="15" />
@@ -58,8 +58,8 @@ export default function App() {
       if (cachedData) {
         setAnalytics(JSON.parse(cachedData));
       }
-    } catch (error) {
-      console.error("Failed to load cached analytics data:", error);
+    } catch (err) {
+      console.error("Failed to load cached analytics data:", err);
       sessionStorage.removeItem('whatsAppChatAnalytics');
     }
 
@@ -241,7 +241,15 @@ export default function App() {
           textContent = await zip.file(chatFile).async('string');
         } else { textContent = ev.target.result; }
         processChatText(textContent);
-      } catch (err) { console.error("Processing error:", err); setError(err.message); } 
+      } catch (err) {
+        if (err instanceof Error) {
+            console.error("Processing error:", err);
+            setError(err.message);
+        } else {
+            console.error("An unexpected error occurred:", err);
+            setError("An unexpected error occurred during file processing.");
+        }
+      } 
       finally { setIsLoading(false); }
     };
     reader.onerror = () => { setError("Failed to read the file."); setIsLoading(false); };
