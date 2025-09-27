@@ -306,7 +306,7 @@ export default function App() {
     labelKey: keyof T;
   };
 
-  const BarChartCard = <T,>({ title, data, dataKey, labelKey }: BarChartCardProps<T>) => {
+  const BarChartCard = <T extends object>({ title, data, dataKey, labelKey }: BarChartCardProps<T>) => {
       const maxValue = data.length > 0 ? Math.max(...data.map(d => d[dataKey] as number)) : 0;
       return (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl">
@@ -316,11 +316,11 @@ export default function App() {
                       const widthPercentage = maxValue > 0 ? ((d[dataKey] as number) / maxValue) * 100 : 0;
                       return (
                         <li key={i} className="flex items-center text-sm">
-                            <span className="w-10 text-slate-400 text-xs">{d[labelKey] as ReactNode}</span>
-                            <div className="flex-1 bg-slate-700 rounded-full h-4 mx-1 sm:mx-2">
-                                <div className="bg-gradient-to-r from-teal-500 to-green-400 h-4 rounded-full" style={{ width: `${widthPercentage}%` }}></div>
+                            <span className="w-10 flex-shrink-0 text-slate-400 text-xs">{d[labelKey] as ReactNode}</span>
+                            <div className="flex-grow bg-slate-700 rounded-full h-3 mx-2" style={{ maxWidth: "calc(100% - 50px)" }}>
+                                <div className="bg-gradient-to-r from-teal-500 to-green-400 h-3 rounded-full" style={{ width: `${widthPercentage}%` }}></div>
                             </div>
-                            <span className="font-semibold text-teal-300">{d[dataKey] as ReactNode}</span>
+                            <span className="font-semibold text-teal-300 w-8 text-right flex-shrink-0 text-xs">{d[dataKey] as ReactNode}</span>
                         </li>
                       )
                   })}
@@ -384,12 +384,60 @@ export default function App() {
 
             {activeTab === 'users' && (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <ListCard title="Messages per User" data={analytics.messagesPerUser} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.count}</span></li>} />
-                  <ListCard title="Words per User" data={analytics.wordsPerUser} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.count}</span></li>} />
-                  <ListCard title="Letters per User" data={analytics.lettersPerUser} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.count}</span></li>} />
-                  <ListCard title="Avg. Letters / Message" data={analytics.avgLettersPerMessage} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.avg}</span></li>} />
-                  <ListCard title="Media Files per User" data={analytics.filesPerUser} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.count}</span></li>} />
-                  <ListCard title="Emojis per User" data={analytics.emojisPerUser} renderItem={(u,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{u.name}</span> <span className="font-semibold text-teal-300">{u.count}</span></li>} />
+                  <ListCard title="Messages per User" data={analytics.messagesPerUser} renderItem={(u,i) => (
+                    <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.count}</span>
+                    </li>
+                  )} />
+                  <ListCard title="Words per User" data={analytics.wordsPerUser} renderItem={(u,i) => (
+                    <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.count}</span>
+                    </li>
+                  )} />
+                  <ListCard title="Letters per User" data={analytics.lettersPerUser} renderItem={(u,i) => (
+                     <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.count}</span>
+                    </li>
+                  )} />
+                  <ListCard title="Avg. Letters / Message" data={analytics.avgLettersPerMessage} renderItem={(u,i) => (
+                     <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.avg}</span>
+                    </li>
+                  )} />
+                  <ListCard title="Media Files per User" data={analytics.filesPerUser} renderItem={(u,i) => (
+                     <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.count}</span>
+                    </li>
+                  )} />
+                  <ListCard title="Emojis per User" data={analytics.emojisPerUser} renderItem={(u,i) => (
+                    <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <MedalIcon rank={i}/>
+                        <span className="truncate">{u.name}</span>
+                      </div>
+                      <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{u.count}</span>
+                    </li>
+                  )} />
                 </div>
             )}
             
@@ -397,8 +445,24 @@ export default function App() {
                 <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
                     <BarChartCard title="Messages by Day of Week" data={analytics.messagesByDay} dataKey="count" labelKey="day" />
                     <BarChartCard title="Messages by Hour" data={analytics.messagesByHour} dataKey="count" labelKey="hour" />
-                    <ListCard title="Busiest Days" data={analytics.topDays} renderItem={(d, i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 min-w-0">{d.date}</span> <span className="font-semibold text-teal-300">{d.count}</span></li>} />
-                    <ListCard title="Messages by Month" data={analytics.messagesByMonth} renderItem={(d, i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 min-w-0">{d.month}</span> <span className="font-semibold text-teal-300">{d.count}</span></li>} />
+                    <ListCard title="Busiest Days" data={analytics.topDays} renderItem={(d, i) => (
+                      <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <MedalIcon rank={i}/>
+                          <span className="truncate">{d.date}</span>
+                        </div>
+                        <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{d.count}</span>
+                      </li>
+                    )} />
+                    <ListCard title="Messages by Month" data={analytics.messagesByMonth} renderItem={(d, i) => (
+                      <li key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <MedalIcon rank={i}/>
+                          <span className="truncate">{d.month}</span>
+                        </div>
+                        <span className="font-semibold text-teal-300 flex-shrink-0 sm:pl-2">{d.count}</span>
+                      </li>
+                    )} />
                     <ListCard title="First Messages" data={analytics.firstMessages} renderItem={(d, i) => <li key={i} className="text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><p className="font-semibold truncate">{d.name}</p><p className="text-xs text-slate-400">{d.date}</p></li>} />
                     <ListCard title="Last Messages" data={analytics.lastMessages} renderItem={(d, i) => <li key={i} className="text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><p className="font-semibold truncate">{d.name}</p><p className="text-xs text-slate-400">{d.date}</p></li>} />
                 </div>
@@ -406,9 +470,33 @@ export default function App() {
 
             {activeTab === 'content' && (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ListCard title="Most Used Words (>3 letters)" data={analytics.mostUsedWords} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{w.word}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
-                    <ListCard title="Most Used Emojis" data={analytics.mostUsedEmojis} renderItem={(e,i) => <li key={i} className="flex items-center space-x-2 text-2xl p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 min-w-0">{e.emoji}</span> <span className="font-semibold text-teal-300 text-sm">{e.count}</span></li>} />
-                    <ListCard title="Most Linked Websites" data={analytics.mostUsedWebsites} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{w.website}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
+                    <ListCard title="Most Used Words (>3 letters)" data={analytics.mostUsedWords} renderItem={(w,i) => (
+                      <li key={i} className="flex justify-between items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <MedalIcon rank={i}/>
+                          <span className="truncate">{w.word}</span>
+                        </div>
+                        <span className="font-semibold text-teal-300 flex-shrink-0 pl-2">{w.count}</span>
+                      </li>
+                    )} />
+                    <ListCard title="Most Used Emojis" data={analytics.mostUsedEmojis} renderItem={(e,i) => (
+                      <li key={i} className="flex justify-between items-center text-2xl p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <MedalIcon rank={i}/>
+                          <span className="truncate">{e.emoji}</span>
+                        </div>
+                        <span className="font-semibold text-teal-300 text-sm flex-shrink-0 pl-2">{e.count}</span>
+                      </li>
+                    )} />
+                    <ListCard title="Most Linked Websites" data={analytics.mostUsedWebsites} renderItem={(w,i) => (
+                      <li key={i} className="flex justify-between items-center text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <MedalIcon rank={i}/>
+                          <span className="truncate">{w.website}</span>
+                        </div>
+                        <span className="font-semibold text-teal-300 flex-shrink-0 pl-2">{w.count}</span>
+                      </li>
+                    )} />
                     <div className="md:col-span-2 lg:col-span-3">
                         <ListCard title="Top Emojis by User" data={analytics.topEmojisByUser} renderItem={(u, i) => (
                             <li key={i} className="text-sm p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
