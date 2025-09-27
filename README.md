@@ -88,8 +88,8 @@ Follow these steps to set up locally:
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/whatsapp-chat-analyzer.git
-cd whatsapp-chat-analyzer
+git clone https://github.com/codewithayuu/whatsapp-stats
+cd whatsapp-stats
 
 # Install dependencies
 npm install
