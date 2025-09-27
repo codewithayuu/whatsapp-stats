@@ -1,4 +1,4 @@
-# 📊 WhatsApp Chat Analyzer
+# 📊 WhatsApp Chat Analyzer  
 
 <div align="center">  
 🚀 Dive deep into your WhatsApp conversations with a modern, privacy-first web app.  
