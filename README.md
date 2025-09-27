@@ -5,7 +5,7 @@
 </div>  
 
 <div align="center">  
-🔗 [👉 Try it live here](https://ak-wpstats.vercel.app/)  
+🔗 https://ak-wpstats.vercel.app/  
 </div>  
 
 This tool transforms your exported chat history into an interactive dashboard full of meaningful insights. All processing happens **directly in your browser** — your data never leaves your device.
