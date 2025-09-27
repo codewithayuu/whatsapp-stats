@@ -1,7 +1,44 @@
 "use client";
 import { useState, useEffect, ReactNode } from "react";
 
-// Helper components for icons (inline SVGs)
+// --- TYPE DEFINITIONS ---
+interface Summary {
+  from: string; to: string; totalMessages: number; totalWords: number;
+  totalLetters: number; totalFiles: number; totalEmojis: number;
+  totalLinks: number; activeUsers: number;
+}
+interface UserStat { name: string; count: number; }
+interface UserAvgStat { name: string; avg: string; }
+interface TimeStat { day: string; count: number; }
+interface HourStat { hour: string; count: number; }
+interface MonthStat { month: string; count: number; }
+interface DateStat { date: string; count: number; }
+interface MessageInfo { name: string; date: string; }
+interface WordStat { word: string; count: number; }
+interface EmojiStat { emoji: string; count: number; }
+interface WebsiteStat { website: string; count: number; }
+interface TopEmojiStat { name: string; list: { item: string; count: number }[]; }
+interface TopWebsiteStat { name: string; list: { item: string; count: number }[]; }
+
+interface AnalyticsData {
+  summary: Summary;
+  messagesPerUser: UserStat[]; wordsPerUser: UserStat[]; lettersPerUser: UserStat[];
+  avgLettersPerMessage: UserAvgStat[]; filesPerUser: UserStat[]; emojisPerUser: UserStat[];
+  linksPerUser: UserStat[]; messagesByDay: TimeStat[]; messagesByHour: HourStat[];
+  messagesByMonth: MonthStat[]; topDays: DateStat[]; firstMessages: MessageInfo[];
+  lastMessages: MessageInfo[]; mostUsedWords: WordStat[]; mostUsedEmojis: EmojiStat[];
+  mostUsedWebsites: WebsiteStat[]; topEmojisByUser: TopEmojiStat[]; topWebsitesByUser: TopWebsiteStat[];
+}
+
+interface JSZipFile { async(type: 'string'): Promise<string>; }
+interface JSZip {
+    loadAsync(data: ArrayBuffer): Promise<JSZip & { files: { [key: string]: JSZipFile } }>;
+    file(name: string): JSZipFile | null;
+}
+declare global { interface Window { JSZip: new () => JSZip; } }
+
+
+// --- HELPER COMPONENTS ---
 const UploadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-teal-300">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -22,16 +59,14 @@ const icons = {
     users: <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
 };
 
-const StatIcon = ({ type }: { type: keyof typeof icons }) => {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-teal-400">
-            {icons[type] || <polyline points="13 2 13 9 20 9" />}
-        </svg>
-    );
-};
+const StatIcon = ({ type }: { type: keyof typeof icons }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-teal-400">
+        {icons[type] || <polyline points="13 2 13 9 20 9" />}
+    </svg>
+);
 
 const MedalIcon = ({ rank }: { rank: number }) => {
-    const colors = { 0: "text-yellow-400", 1: "text-gray-300", 2: "text-yellow-600" };
+    const colors: { [key: number]: string } = { 0: "text-yellow-400", 1: "text-gray-300", 2: "text-yellow-600" };
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-5 h-5 ${colors[rank] || 'text-transparent'}`}>
             <path d="M12 8V2M12 8c4.4 0 8 1.8 8 4s-3.6 4-8 4-8-1.8-8-4 3.6-4 8-4z" />
@@ -40,14 +75,13 @@ const MedalIcon = ({ rank }: { rank: number }) => {
     );
 };
 
-// Main Application Component
+// --- MAIN APP COMPONENT ---
 export default function App() {
-  const [analytics, setAnalytics] = useState<any | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('summary');
 
-  // Load JSZip library and cached data on mount
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
@@ -56,43 +90,33 @@ export default function App() {
 
     try {
       const cachedData = sessionStorage.getItem('whatsAppChatAnalytics');
-      if (cachedData) {
-        setAnalytics(JSON.parse(cachedData));
-      }
+      if (cachedData) setAnalytics(JSON.parse(cachedData));
     } catch (err) {
       console.error("Failed to load cached analytics data:", err);
       sessionStorage.removeItem('whatsAppChatAnalytics');
     }
-
     return () => { document.body.removeChild(script); }
   }, []);
 
   const parseWhatsAppDate = (dateStr: string) => {
       const cleanStr = dateStr.replace(/\[|\]/g, '').replace(',', '');
       const dateTimeParts = cleanStr.split(' ');
-      
       const datePart = dateTimeParts[0];
       const timePart = dateTimeParts[1];
       const ampmPart = dateTimeParts.length > 2 ? dateTimeParts[2].toLowerCase() : null;
-
       const [day, month, yearShort] = datePart.split('/');
       const year = parseInt(yearShort) < 100 ? 2000 + parseInt(yearShort) : parseInt(yearShort);
-      
       const timeParts = timePart.split(':').map(p => parseInt(p));
       let hours = timeParts[0];
       const minutes = timeParts[1];
-
       if (ampmPart === 'pm' && hours < 12) hours += 12;
       if (ampmPart === 'am' && hours === 12) hours = 0;
-
       return new Date(year, parseInt(month) - 1, parseInt(day), hours, minutes);
   };
 
   const processChatText = (text: string) => {
     const lines = text.split('\n');
-    const messageRegex = /^\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4},? \d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*([^:]+):\s*(.*)/s;
-    const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji})/gu;
-    const linkRegex = /https?:\/\/[^\s]+/g;
+    const messageRegex = /^\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4},? \d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*([^:]+):\s*([\s\S]*)/;
     
     const intermediateStats = {
         userStats: new Map<string, number>(), wordsPerUser: new Map<string, number>(), lettersPerUser: new Map<string, number>(),
@@ -107,14 +131,12 @@ export default function App() {
     lines.forEach(line => {
         const match = line.match(messageRegex);
         if (!match) return;
-
         const [, dateStr, name, message] = match;
         const cleanedName = name.trim();
         if (cleanedName.includes("You changed this group's icon") || cleanedName.includes('Tap to change')) return;
 
         intermediateStats.userStats.set(cleanedName, (intermediateStats.userStats.get(cleanedName) || 0) + 1);
         intermediateStats.dates.push(dateStr);
-
         const date = parseWhatsAppDate(dateStr);
         intermediateStats.messagesPerDay[date.getDay()]++;
         intermediateStats.messagesPerHour[date.getHours()]++;
@@ -122,16 +144,13 @@ export default function App() {
         intermediateStats.messagesPerMonth.set(monthYear, (intermediateStats.messagesPerMonth.get(monthYear) || 0) + 1);
         const fullDate = date.toLocaleDateString('en-GB');
         intermediateStats.messagesPerDate.set(fullDate, (intermediateStats.messagesPerDate.get(fullDate) || 0) + 1);
-
-        if (!intermediateStats.firstMessage.has(cleanedName)) {
-            intermediateStats.firstMessage.set(cleanedName, { date: dateStr, message });
-        }
+        if (!intermediateStats.firstMessage.has(cleanedName)) intermediateStats.firstMessage.set(cleanedName, { date: dateStr, message });
         intermediateStats.lastMessage.set(cleanedName, { date: dateStr, message });
-
+        
         const words = message.match(/\S+/g) || [];
         const letters = message.replace(/\s/g, '');
-        const emojis = message.match(emojiRegex) || [];
-        const links = message.match(linkRegex) || [];
+        const emojis = message.match(/(\p{Emoji_Presentation}|\p{Emoji})/gu) || [];
+        const links = message.match(/https?:\/\/[^\s]+/g) || [];
 
         intermediateStats.wordsPerUser.set(cleanedName, (intermediateStats.wordsPerUser.get(cleanedName) || 0) + words.length);
         intermediateStats.lettersPerUser.set(cleanedName, (intermediateStats.lettersPerUser.get(cleanedName) || 0) + letters.length);
@@ -205,13 +224,26 @@ export default function App() {
         summary.activeUsers = activeUserCount;
     }
 
-    const finalAnalytics = {
+    const finalAnalytics: AnalyticsData = {
         summary, messagesPerUser, wordsPerUser, lettersPerUser, avgLettersPerMessage,
         filesPerUser: sortMap(intermediateStats.filesPerUser), emojisPerUser: sortMap(intermediateStats.emojisPerUser),
         linksPerUser: sortMap(intermediateStats.linksPerUser),
         messagesByDay: intermediateStats.messagesPerDay.map((count, i) => ({ day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i], count })),
         messagesByHour: intermediateStats.messagesPerHour.map((count, i) => ({ hour: i.toString().padStart(2, '0'), count })),
-        messagesByMonth: Array.from(intermediateStats.messagesPerMonth.entries()).map(([month, count]) => ({ month, count })).sort((a,b) => new Date(b.month.split('/')[1], parseInt(b.month.split('/')[0])-1, 1).getTime() - new Date(a.month.split('/')[1], parseInt(a.month.split('/')[0])-1, 1).getTime()),
+        messagesByMonth: Array.from(intermediateStats.messagesPerMonth.entries())
+            .map(([month, count]) => ({ month, count }))
+            .sort((a, b) =>
+                new Date(
+                    parseInt(b.month.split('/')[1]), // year
+                    parseInt(b.month.split('/')[0]) - 1, // month (0-based)
+                    1
+                ).getTime() -
+                new Date(
+                    parseInt(a.month.split('/')[1]), // year
+                    parseInt(a.month.split('/')[0]) - 1, // month (0-based)
+                    1
+                ).getTime()
+            ),
         topDays: Array.from(intermediateStats.messagesPerDate.entries()).map(([date, count]) => ({ date, count })).sort((a, b) => b.count - a.count).slice(0, 20),
         firstMessages: Array.from(intermediateStats.firstMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(a.date).getTime() - parseWhatsAppDate(b.date).getTime()),
         lastMessages: Array.from(intermediateStats.lastMessage.entries()).map(([name, {date}]) => ({ name, date })).sort((a,b) => parseWhatsAppDate(b.date).getTime() - parseWhatsAppDate(a.date).getTime()),
@@ -235,26 +267,26 @@ export default function App() {
       try {
         let textContent = '';
         if (file.name.toLowerCase().endsWith('.zip')) {
-          if (!(window as any).JSZip) { throw new Error("ZIP library not loaded yet. Please wait a moment and try again."); }
-          const zip = await (window as any).JSZip.loadAsync(ev.target!.result);
-          const chatFile = Object.keys(zip.files).find(name => name.endsWith('.txt') && !name.startsWith('__MACOSX'));
-          if (!chatFile) { throw new Error("Could not find a '_chat.txt' file inside the ZIP archive."); }
-          textContent = await zip.file(chatFile).async('string');
-        } else { textContent = ev.target!.result as string; }
+          if (!window.JSZip) throw new Error("ZIP library not loaded yet.");
+          const zip = new window.JSZip();
+          const loadedZip = await zip.loadAsync(ev.target!.result as ArrayBuffer);
+          const chatFileKey = Object.keys(loadedZip.files).find(name => name.endsWith('.txt') && !name.startsWith('__MACOSX'));
+          if (!chatFileKey) throw new Error("Could not find a '.txt' file inside the ZIP archive.");
+          const chatFile = loadedZip.file(chatFileKey);
+          if(chatFile) textContent = await chatFile.async('string');
+        } else { 
+          textContent = ev.target!.result as string; 
+        }
         processChatText(textContent);
       } catch (err) {
-        if (err instanceof Error) {
-            console.error("Processing error:", err);
-            setError(err.message);
-        } else {
-            console.error("An unexpected error occurred:", err);
-            setError("An unexpected error occurred during file processing.");
-        }
+        if (err instanceof Error) setError(err.message);
+        else setError("An unexpected error occurred.");
       } 
       finally { setIsLoading(false); }
     };
     reader.onerror = () => { setError("Failed to read the file."); setIsLoading(false); };
-    if (file.name.toLowerCase().endsWith('.zip')) { reader.readAsArrayBuffer(file); } else { reader.readAsText(file); }
+    if (file.name.toLowerCase().endsWith('.zip')) reader.readAsArrayBuffer(file);
+    else reader.readAsText(file);
   };
   
   const StatCard = ({ label, value, icon }: { label: string; value: string | number; icon: keyof typeof icons }) => (
@@ -266,22 +298,29 @@ export default function App() {
         <p className="text-xl md:text-2xl font-bold text-teal-300 break-words">{value}</p>
     </div>
   );
+  
+  type BarChartCardProps<T> = {
+    title: string;
+    data: T[];
+    dataKey: keyof T;
+    labelKey: keyof T;
+  };
 
-  const BarChartCard = ({ title, data, dataKey, labelKey }: { title: string; data: Array<Record<string, any>>; dataKey: string; labelKey: string }) => {
-      const maxValue = data.length > 0 ? Math.max(...data.map(d => d[dataKey])) : 0;
+  const BarChartCard = <T,>({ title, data, dataKey, labelKey }: BarChartCardProps<T>) => {
+      const maxValue = data.length > 0 ? Math.max(...data.map(d => d[dataKey] as number)) : 0;
       return (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl">
               <h2 className="text-xl font-semibold text-teal-300 mb-4">{title}</h2>
               <ul className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
                   {data.map((d, i) => {
-                      const widthPercentage = maxValue > 0 ? (d[dataKey] / maxValue) * 100 : 0;
+                      const widthPercentage = maxValue > 0 ? ((d[dataKey] as number) / maxValue) * 100 : 0;
                       return (
                         <li key={i} className="flex items-center text-sm">
-                            <span className="w-10 text-slate-400 text-xs">{d[labelKey]}</span>
+                            <span className="w-10 text-slate-400 text-xs">{d[labelKey] as ReactNode}</span>
                             <div className="flex-1 bg-slate-700 rounded-full h-4 mx-1 sm:mx-2">
                                 <div className="bg-gradient-to-r from-teal-500 to-green-400 h-4 rounded-full" style={{ width: `${widthPercentage}%` }}></div>
                             </div>
-                            <span className="font-semibold text-teal-300">{d[dataKey]}</span>
+                            <span className="font-semibold text-teal-300">{d[dataKey] as ReactNode}</span>
                         </li>
                       )
                   })}
@@ -290,7 +329,7 @@ export default function App() {
       )
   };
 
-  const ListCard = ({ title, data, renderItem }: { title: string; data: Array<any>; renderItem: (item: any, index: number) => ReactNode }) => (
+  const ListCard = <T extends object>({ title, data, renderItem }: { title: string; data: T[]; renderItem: (item: T, index: number) => ReactNode }) => (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl shadow-xl">
         <h2 className="text-xl font-semibold text-teal-300 mb-4">{title}</h2>
         <ul className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
@@ -367,9 +406,9 @@ export default function App() {
 
             {activeTab === 'content' && (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ListCard title="Most Used Words (>3 letters)" data={analytics.mostUsedWords} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 min-w-0">{w.word}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
+                    <ListCard title="Most Used Words (>3 letters)" data={analytics.mostUsedWords} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{w.word}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
                     <ListCard title="Most Used Emojis" data={analytics.mostUsedEmojis} renderItem={(e,i) => <li key={i} className="flex items-center space-x-2 text-2xl p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 min-w-0">{e.emoji}</span> <span className="font-semibold text-teal-300 text-sm">{e.count}</span></li>} />
-                    <ListCard title="Most Linked Websites" data={analytics.mostUsedWebsites} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="flex-1 truncate min-w-0">{w.website}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
+                    <ListCard title="Most Linked Websites" data={analytics.mostUsedWebsites} renderItem={(w,i) => <li key={i} className="flex items-center space-x-2 text-sm p-1 rounded-md hover:bg-slate-700/50 transition-colors"><MedalIcon rank={i}/> <span className="truncate flex-1 min-w-0">{w.website}</span> <span className="font-semibold text-teal-300">{w.count}</span></li>} />
                     <div className="md:col-span-2 lg:col-span-3">
                         <ListCard title="Top Emojis by User" data={analytics.topEmojisByUser} renderItem={(u, i) => (
                             <li key={i} className="text-sm p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
@@ -403,5 +442,4 @@ export default function App() {
     </div>
   );
 }
-
 
